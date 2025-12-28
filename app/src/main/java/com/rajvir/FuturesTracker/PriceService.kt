@@ -216,7 +216,7 @@ class PriceService : Service() {
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
-            textSize = 48f
+            textSize = 42f
             typeface = Typeface.DEFAULT_BOLD
             textAlign = Paint.Align.CENTER
             setShadowLayer(2f, 0f, 0f, Color.BLACK)
