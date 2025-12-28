@@ -1,4 +1,4 @@
-package com.example.cryptostatus
+package com.rajvir.FuturesTracker
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

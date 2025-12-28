@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.cryptostatus"
+    namespace = "com.rajvir.FuturesTracker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.cryptostatus"
+        applicationId = "com.rajvir.FuturesTracker"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

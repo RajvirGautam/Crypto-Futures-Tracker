@@ -1,4 +1,4 @@
-package com.example.cryptostatus
+package com.rajvir.FuturesTracker
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

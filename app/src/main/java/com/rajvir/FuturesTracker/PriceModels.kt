@@ -1,4 +1,4 @@
-package com.example.cryptostatus
+package com.rajvir.FuturesTracker
 
 data class FuturesPrice(
     val symbol: String,

@@ -1,4 +1,4 @@
-package com.example.cryptostatus
+package com.rajvir.FuturesTracker
 
 data class ExchangeInfo(
     val symbols: List<SymbolInfo>
