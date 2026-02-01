@@ -24,8 +24,22 @@ object WidgetUpdater {
 
     suspend fun updateAllWidgets(context: Context) {
         val appWidgetManager = AppWidgetManager.getInstance(context)
-        val componentName = ComponentName(context, CryptoWidgetProvider::class.java)
-        val widgetIds = appWidgetManager.getAppWidgetIds(componentName)
+
+        // Collect IDs from all registered widget providers (original + 16 size variants)
+        val providerClasses = listOf(
+            CryptoWidgetProvider::class.java,
+            Widget1x1Provider::class.java, Widget1x2Provider::class.java,
+            Widget1x3Provider::class.java, Widget1x4Provider::class.java,
+            Widget2x1Provider::class.java, Widget2x2Provider::class.java,
+            Widget2x3Provider::class.java, Widget2x4Provider::class.java,
+            Widget3x1Provider::class.java, Widget3x2Provider::class.java,
+            Widget3x3Provider::class.java, Widget3x4Provider::class.java,
+            Widget4x1Provider::class.java, Widget4x2Provider::class.java,
+            Widget4x3Provider::class.java, Widget4x4Provider::class.java
+        )
+        val widgetIds = providerClasses
+            .flatMap { appWidgetManager.getAppWidgetIds(ComponentName(context, it)).toList() }
+            .toIntArray()
         if (widgetIds.isEmpty()) return
 
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
