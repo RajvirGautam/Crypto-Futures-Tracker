@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_card"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/widgetSymbol"
+        android:text="BTCUSDT"
+        android:textColor="@color/white"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/widgetPrice"
+        android:text="00000"
+        android:textColor="@color/binance_yellow"
+        android:textSize="22sp"
+        android:textStyle="bold"/>
+</LinearLayout>

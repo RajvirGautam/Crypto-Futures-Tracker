@@ -207,6 +207,17 @@
             android:textColor="@color/black"
             app:cornerRadius="8dp"/>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddWidget"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="ADD HOME SCREEN WIDGET"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            app:backgroundTint="@color/binance_yellow"
+            app:cornerRadius="8dp"
+            android:layout_marginTop="12dp"/>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

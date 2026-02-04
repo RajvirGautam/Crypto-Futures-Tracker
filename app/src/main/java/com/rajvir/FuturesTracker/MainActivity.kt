@@ -67,6 +67,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<MaterialButton>(R.id.btnAddWidget).setOnClickListener {
+            val intent = Intent(this, WidgetConfigActivity::class.java)
+            startActivity(intent)
+        }
+
         etSymbol.setOnItemClickListener { _, _, _, _ ->
             prefs.edit().putString("symbol", etSymbol.text.toString()).apply()
         }
@@ -206,3 +211,4 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
+
