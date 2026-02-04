@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private var previewJob: Job? = null
     private var symbolsLoaded = false
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
