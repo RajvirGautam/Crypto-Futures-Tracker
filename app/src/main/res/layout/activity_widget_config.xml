@@ -1,22 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_deep"
-    android:padding="24dp"
-    android:orientation="vertical">
+    android:background="#121212"
+    android:orientation="vertical"
+    android:padding="24dp">
 
     <AutoCompleteTextView
         android:id="@+id/etWidgetSymbol"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Select Symbol (BTCUSDT)"
-        android:textColor="@color/white"/>
+        android:layout_height="78dp"
+        android:backgroundTint="#F0B90B"
+        android:hint="Select Contract (BTCUSDT)"
+        android:inputType="textCapCharacters"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#777777" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnWidgetDone"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#F0B90B"
         android:text="ADD WIDGET"
-        android:textStyle="bold"
-        android:layout_marginTop="24dp"/>
+        android:textColor="#000000" />
 </LinearLayout>

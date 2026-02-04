@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material)
+    implementation ("androidx.work:work-runtime-ktx:2.9.0")
 
     // NETWORK
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
