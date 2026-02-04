@@ -2,42 +2,67 @@ package com.rajvir.FuturesTracker
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.graphics.Color
 import android.widget.RemoteViews
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import java.text.DecimalFormat
 
 class WidgetUpdateWorker(
-    private val ctx: Context,
+    context: Context,
     params: WorkerParameters
-) : CoroutineWorker(ctx, params) {
+) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        try {
-            val widgetId = inputData.getInt("widget_id", -1)
-            if (widgetId == -1) return Result.failure()
+        val widgetId = inputData.getInt("widget_id", -1)
+        if (widgetId == -1) return Result.failure()
 
-            val prefs = ctx.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-            val symbol = prefs.getString("widget_${widgetId}_symbol", "BTCUSDT")!!
+        val prefs = applicationContext.getSharedPreferences(
+            "widget_prefs",
+            Context.MODE_PRIVATE
+        )
 
-            val price = ApiClient.api
-                .getFuturesPrice(symbol)
-                .markPrice
-                .toDouble()
+        val symbol = prefs.getString(
+            "widget_${widgetId}_symbol",
+            "BTCUSDT"
+        ) ?: "BTCUSDT"
 
-            val df = DecimalFormat("#,##0.0000")
+        return try {
+            val priceData = ApiClient.api.getFuturesPrice(symbol)
+            val ticker = ApiClient.api.get24hTicker(symbol)
 
-            val views = RemoteViews(ctx.packageName, R.layout.widget_crypto)
-            views.setTextViewText(R.id.tvWidgetTitle, symbol)
-            views.setTextViewText(R.id.tvWidgetPrice, df.format(price))
+            val price = priceData.markPrice.toDouble()
+            val change = ticker.priceChangePercent.toDouble()
 
-            AppWidgetManager.getInstance(ctx)
-                .updateAppWidget(widgetId, views)
+            val views = RemoteViews(
+                applicationContext.packageName,
+                R.layout.widget_crypto
+            )
 
-            return Result.success()
+            views.setTextViewText(
+                R.id.tvWidgetTitle,
+                symbol
+            )
 
+            views.setTextViewText(
+                R.id.tvWidgetPrice,
+                String.format("$%,.4f", price)
+            )
+
+            val color = if (change >= 0) {
+                Color.parseColor("#0ECB81") // green
+            } else {
+                Color.parseColor("#F6465D") // red
+            }
+
+            views.setTextColor(R.id.tvWidgetPrice, color)
+
+            val manager = AppWidgetManager.getInstance(applicationContext)
+            manager.updateAppWidget(widgetId, views)
+
+            Result.success()
         } catch (e: Exception) {
-            return Result.retry()
+            e.printStackTrace()
+            Result.retry()
         }
     }
 }
