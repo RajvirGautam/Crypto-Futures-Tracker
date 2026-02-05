@@ -1,5 +1,7 @@
 package com.rajvir.FuturesTracker
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
@@ -36,6 +38,18 @@ class CryptoWidgetProvider : AppWidgetProvider() {
             val oneTimeWork = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
                 .setInputData(workDataOf("widget_id" to widgetId))
                 .build()
+
+            val refreshIntent = Intent(context, CryptoWidgetProvider::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(widgetId))
+            }
+
+            val pi = PendingIntent.getBroadcast(
+                context, widgetId, refreshIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            views.setOnClickPendingIntent(R.id.rootLayout, pi)
 
             WorkManager.getInstance(context).enqueue(oneTimeWork)
 

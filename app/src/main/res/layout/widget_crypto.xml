@@ -1,26 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
-    android:padding="12dp"
-    android:orientation="vertical">
+    android:background="@drawable/widget_bg"
+    android:padding="20dp">
 
-    <TextView
-        android:id="@+id/tvWidgetTitle"
-        android:layout_width="wrap_content"
+    <!-- Top Container -->
+    <RelativeLayout
+        android:id="@+id/topContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SYMBOL"
-        android:textColor="#F0B90B"
-        android:textSize="14sp"
-        android:textStyle="bold"/>
+        android:layout_alignParentTop="true">
+        
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/circle_bg"
+            android:src="@drawable/ic_btc"
+            android:padding="12dp"
+            android:scaleType="centerInside" />
 
-    <TextView
-        android:id="@+id/tvWidgetPrice"
-        android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/imgLogo"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvSymbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="BTC"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp" />
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bitcoin / Tether"
+                android:textColor="#A1A1AA"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:drawableStart="@drawable/ic_refresh"
+            android:drawablePadding="4dp"
+            android:text="0:56"
+            android:textColor="#A1A1AA"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <!-- Bottom Container -->
+    <RelativeLayout
+        android:id="@+id/bottomContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="PRICE"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold"/>
-</LinearLayout>
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="82,384.96"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="36sp" />
+            <TextView
+                android:id="@+id/tvChange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="USDT +1,5010.99 • 1.85%"
+                android:textColor="#10B981"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnStars"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/circle_bg_dark"
+            android:src="@drawable/ic_stars"
+            android:scaleType="centerInside"
+            android:padding="12dp" />
+    </RelativeLayout>
+
+    <!-- Middle: Sparkline -->
+    <ImageView
+        android:id="@+id/imgGraph"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/topContainer"
+        android:layout_above="@id/bottomContainer"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:scaleType="fitXY" />
+
+</RelativeLayout>

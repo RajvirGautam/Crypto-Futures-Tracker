@@ -24,4 +24,11 @@ interface CryptoApi {
     suspend fun getFuturesPrice(
         @Query("symbol") symbol: String
     ): FuturesPrice
+
+    @GET("fapi/v1/klines")
+    suspend fun getKlines(
+        @Query("symbol") symbol: String,
+        @Query("interval") interval: String = "1m",
+        @Query("limit") limit: Int = 60
+    ): List<List<String>>
 }
