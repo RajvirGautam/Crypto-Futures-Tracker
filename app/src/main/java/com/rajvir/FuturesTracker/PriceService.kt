@@ -79,6 +79,9 @@ class PriceService : Service() {
                         longPct, shortPct,
                         iconText
                     )
+                    
+                    // 🔹 Update the widget every single second natively!
+                    WidgetUpdater.updateAllWidgets(applicationContext)
 
                 } catch (e: Exception) {
                     e.printStackTrace()

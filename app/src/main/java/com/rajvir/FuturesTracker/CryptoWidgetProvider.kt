@@ -29,15 +29,21 @@ class CryptoWidgetProvider : AppWidgetProvider() {
                 R.layout.widget_crypto
             )
 
-            views.setTextViewText(R.id.tvWidgetTitle, symbol)
-            views.setTextViewText(R.id.tvWidgetPrice, "Loading...")
+            val baseAsset = symbol.removeSuffix("USDT").removeSuffix("BUSD").removeSuffix("BTC")
+            val quoteAsset = when {
+                symbol.endsWith("USDT") -> "Tether"
+                symbol.endsWith("BUSD") -> "BUSD"
+                symbol.endsWith("BTC") -> "Bitcoin"
+                else -> "USDT"
+            }
+
+            views.setTextViewText(R.id.tvSymbol, baseAsset)
+            views.setTextViewText(R.id.tvName, "$baseAsset / $quoteAsset")
+            views.setTextViewText(R.id.tvPrice, "Loading...")
 
             appWidgetManager.updateAppWidget(widgetId, views)
 
-            // 🔹 ONE-TIME IMMEDIATE UPDATE
-            val oneTimeWork = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
-                .setInputData(workDataOf("widget_id" to widgetId))
-                .build()
+            appWidgetManager.updateAppWidget(widgetId, views)
 
             val refreshIntent = Intent(context, CryptoWidgetProvider::class.java).apply {
                 action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
@@ -50,21 +56,15 @@ class CryptoWidgetProvider : AppWidgetProvider() {
             )
 
             views.setOnClickPendingIntent(R.id.rootLayout, pi)
-
-            WorkManager.getInstance(context).enqueue(oneTimeWork)
-
-            // 🔹 PERIODIC UPDATE (15 min – Android minimum)
-            val periodicWork = PeriodicWorkRequestBuilder<WidgetUpdateWorker>(
-                15, java.util.concurrent.TimeUnit.MINUTES
-            )
-                .setInputData(workDataOf("widget_id" to widgetId))
-                .build()
-
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                "widget_update_$widgetId",
-                ExistingPeriodicWorkPolicy.REPLACE,
-                periodicWork
-            )
+            appWidgetManager.updateAppWidget(widgetId, views)
+            
+            // 🔹 Make sure PriceService is running to feed 1-second updates!
+            val serviceIntent = Intent(context, PriceService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
+            }
         }
     }
 }
