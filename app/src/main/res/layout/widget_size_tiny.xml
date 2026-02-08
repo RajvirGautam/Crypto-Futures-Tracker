@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tiny layout: used when EITHER dimension < 110dp (1x1, 2x1, 1x2) -->
+<!-- Shows: symbol (large) + price only -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:gravity="center">
+
+    <!-- Hidden views (same IDs as full layout so WidgetUpdater can set them safely) -->
+    <ImageView android:id="@+id/imgLogo" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/tvName" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/tvTime" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/imgGraph" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/tvChange" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/btnStars" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+
+    <!-- Visible: symbol -->
+    <TextView
+        android:id="@+id/tvSymbol"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="bottom|center_horizontal"
+        android:text="BTC"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif-medium"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="28sp" />
+
+    <!-- Visible: price -->
+    <TextView
+        android:id="@+id/tvPrice"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top|center_horizontal"
+        android:text="0.00"
+        android:textColor="#10B981"
+        android:fontFamily="sans-serif-medium"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="20sp" />
+
+</LinearLayout>

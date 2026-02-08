@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small layout: neither dimension < 110dp, but both < 160dp OR one dimension narrow -->
+<!-- Shows: symbol + price + change text. No graph, no logo, no time. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Hidden views (stubs so WidgetUpdater setXxx calls don't error) -->
+    <ImageView android:id="@+id/imgLogo" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/tvName" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/tvTime" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/imgGraph" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/btnStars" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+
+    <!-- Symbol -->
+    <TextView
+        android:id="@+id/tvSymbol"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.2"
+        android:gravity="bottom|start"
+        android:text="BTC"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif-medium"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeMaxTextSize="30sp" />
+
+    <!-- Price -->
+    <TextView
+        android:id="@+id/tvPrice"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.8"
+        android:gravity="center_vertical|start"
+        android:text="0.00"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif-medium"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="14sp"
+        android:autoSizeMaxTextSize="44sp" />
+
+    <!-- Change -->
+    <TextView
+        android:id="@+id/tvChange"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical|start"
+        android:text="USDT +0.00 • 0.00%"
+        android:textColor="#10B981"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="16sp" />
+
+</LinearLayout>

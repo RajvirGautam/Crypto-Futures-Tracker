@@ -93,7 +93,9 @@ object WidgetUpdater {
                 }
                 val coinName = "$baseAsset / $quoteAsset"
 
-                val views = RemoteViews(context.packageName, R.layout.widget_crypto)
+                val layoutId = BaseWidgetProvider.layoutForWidget(appWidgetManager, widgetId)
+                val views = RemoteViews(context.packageName, layoutId)
+
                 views.setTextViewText(R.id.tvSymbol, baseAsset)
                 views.setTextViewText(R.id.tvName, coinName)
                 views.setTextViewText(R.id.tvPrice, priceStr)
