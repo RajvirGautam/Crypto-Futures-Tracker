@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.view.View
 import android.widget.RemoteViews
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -53,9 +54,9 @@ object WidgetUpdater {
         val currentPrice = ApiClient.api.getFuturesPrice(symbol).markPrice.toFloat()
         val cache = symbolCacheMap.getOrPut(symbol) { SymbolCache() }
         val now = System.currentTimeMillis()
-        if (now - cache.lastKlineFetchTime > 60_000 || cache.sparkline == null) {
+        if (now - cache.lastKlineFetchTime > 300_000 || cache.sparkline == null) {
             try {
-                val klines = ApiClient.api.getKlines(symbol, "1m", 60)
+                val klines = ApiClient.api.getKlines(symbol, "5m", 60)
                 cache.openPrice1hAgo = if (klines.isNotEmpty()) klines.first()[1].toFloat() else currentPrice
                 val sparklineData = if (klines.isNotEmpty()) klines.map { it[4].toFloat() } else listOf(currentPrice)
                 val chg = currentPrice - cache.openPrice1hAgo
@@ -162,6 +163,28 @@ object WidgetUpdater {
                     views.setTextViewText(R.id.tvPrice3, decFmt.format(c3.first))
                     views.setTextViewText(R.id.tvChange3, formatChange(c3.third))
                     views.setTextColor(R.id.tvChange3, changeColor(c3.second >= 0))
+
+                    // Show sparklines per column when the widget is tall enough
+                    val wideOpts = appWidgetManager.getAppWidgetOptions(widgetId)
+                    val wideMinH = wideOpts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+                    if (wideMinH >= 150) {
+                        views.setViewVisibility(R.id.imgGraph, View.VISIBLE)
+                        views.setViewVisibility(R.id.imgGraph2, View.VISIBLE)
+                        views.setViewVisibility(R.id.imgGraph3, View.VISIBLE)
+                        symbolCacheMap[c1Symbol]?.sparkline?.let {
+                            views.setImageViewBitmap(R.id.imgGraph, it)
+                        }
+                        symbolCacheMap[COIN2]?.sparkline?.let {
+                            views.setImageViewBitmap(R.id.imgGraph2, it)
+                        }
+                        symbolCacheMap[c3Symbol]?.sparkline?.let {
+                            views.setImageViewBitmap(R.id.imgGraph3, it)
+                        }
+                    } else {
+                        views.setViewVisibility(R.id.imgGraph, View.GONE)
+                        views.setViewVisibility(R.id.imgGraph2, View.GONE)
+                        views.setViewVisibility(R.id.imgGraph3, View.GONE)
+                    }
                 }
 
                 appWidgetManager.updateAppWidget(widgetId, views)
