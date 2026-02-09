@@ -27,13 +27,15 @@ class PriceService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        if (started) return
-        started = true
 
         createNotificationChannel()
 
-        // Initial empty notification
+        // Always call startForeground() first — Android O+ requires this within 5 seconds
+        // of startForegroundService(), regardless of whether a loop is already running.
         startForeground(1, buildNotification("Initializing...", "---"))
+
+        if (started) return   // loop already running — don't start a second one
+        started = true
 
         startPriceUpdates()
     }

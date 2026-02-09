@@ -29,7 +29,12 @@ class CryptoWidgetProvider : AppWidgetProvider() {
                 R.layout.widget_crypto
             )
 
-            val baseAsset = symbol.removeSuffix("USDT").removeSuffix("BUSD").removeSuffix("BTC")
+            val baseAsset = when {
+                symbol.endsWith("USDT") -> symbol.removeSuffix("USDT")
+                symbol.endsWith("BUSD") -> symbol.removeSuffix("BUSD")
+                symbol.endsWith("BTC")  -> symbol.removeSuffix("BTC")
+                else -> symbol
+            }
             val quoteAsset = when {
                 symbol.endsWith("USDT") -> "Tether"
                 symbol.endsWith("BUSD") -> "BUSD"
@@ -59,12 +64,16 @@ class CryptoWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(widgetId, views)
             
             // 🔹 Make sure PriceService is running to feed 1-second updates!
-            val serviceIntent = Intent(context, PriceService::class.java)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                context.startForegroundService(serviceIntent)
-            } else {
-                context.startService(serviceIntent)
-            }
+            // Wrapped in try/catch so a background-restriction IllegalStateException
+            // doesn't crash onUpdate and trigger "Can't load widget".
+            try {
+                val serviceIntent = Intent(context, PriceService::class.java)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    context.startForegroundService(serviceIntent)
+                } else {
+                    context.startService(serviceIntent)
+                }
+            } catch (_: Exception) { }
         }
     }
 }

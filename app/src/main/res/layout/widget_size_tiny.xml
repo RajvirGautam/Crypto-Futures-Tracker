@@ -1,49 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tiny layout: used when EITHER dimension < 110dp (1x1, 2x1, 1x2) -->
-<!-- Shows: symbol (large) + price only -->
+<!--
+  TINY layout — matches screenshot 1 (smallest size: 1×1, 2×1, 1×2)
+  Dark pill | SYMBOL/USD label | big price | % change | timestamp
+  No icon, no sparkline.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
+    android:background="@drawable/widget_bg_dark"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:gravity="center">
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
-    <!-- Hidden views (same IDs as full layout so WidgetUpdater can set them safely) -->
-    <ImageView android:id="@+id/imgLogo" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <TextView android:id="@+id/tvName" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <TextView android:id="@+id/tvTime" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <ImageView android:id="@+id/imgGraph" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <TextView android:id="@+id/tvChange" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <ImageView android:id="@+id/btnStars" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <!-- Hidden stubs so WidgetUpdater.setXxx() calls don't fail -->
+    <ImageView android:id="@+id/imgLogo"   android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvName"    android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/imgGraph"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/btnStars"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <!-- Multi-coin stubs -->
+    <TextView  android:id="@+id/tvSymbol2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvPrice2"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvChange2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvSymbol3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvPrice3"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvChange3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
 
-    <!-- Visible: symbol -->
+    <!-- SYMBOL/USD label -->
     <TextView
         android:id="@+id/tvSymbol"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="bottom|center_horizontal"
-        android:text="BTC"
-        android:textColor="#FFFFFF"
-        android:fontFamily="sans-serif-medium"
+        android:gravity="bottom|start"
+        android:text="BTC/USD"
+        android:textColor="#A1A1AA"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif"
         android:autoSizeTextType="uniform"
-        android:autoSizeMinTextSize="10sp"
-        android:autoSizeMaxTextSize="28sp" />
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="13sp"/>
 
-    <!-- Visible: price -->
+    <!-- Big price -->
     <TextView
         android:id="@+id/tvPrice"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="top|center_horizontal"
+        android:layout_weight="2"
+        android:gravity="center_vertical|start"
         android:text="0.00"
-        android:textColor="#10B981"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
         android:fontFamily="sans-serif-medium"
         android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeMaxTextSize="32sp"/>
+
+    <!-- % change (green/red) -->
+    <TextView
+        android:id="@+id/tvChange"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical|start"
+        android:text="0.00%"
+        android:textColor="#10B981"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:autoSizeTextType="uniform"
         android:autoSizeMinTextSize="8sp"
-        android:autoSizeMaxTextSize="20sp" />
+        android:autoSizeMaxTextSize="14sp"/>
+
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top|start"
+        android:text="0:00 am"
+        android:textColor="#606060"
+        android:textSize="9sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="7sp"
+        android:autoSizeMaxTextSize="11sp"/>
 
 </LinearLayout>

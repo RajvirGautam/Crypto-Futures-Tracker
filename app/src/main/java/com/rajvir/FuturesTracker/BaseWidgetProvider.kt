@@ -25,23 +25,33 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
 
     companion object {
         /**
-         * Pick the right layout resource based on the widget's min width/height in dp.
-         * Android reports the *minimum* guaranteed size via OPTION_APPWIDGET_MIN_WIDTH /
-         * OPTION_APPWIDGET_MIN_HEIGHT inside the options Bundle.
+         * Pick layout based on OPTION_APPWIDGET_MIN_WIDTH / MIN_HEIGHT (dp).
+         *
+         *  Tiny   < 80 wide OR < 80 tall  → 1×1, 2×1, 1×2  → compact pill (symbol + price + %)
+         *  Small  ≥ 80 both, < 150 both   → 2×2, 1×3, 1×4  → icon + label + giant price + change + time
+         *  Wide   ≥ 176 wide & ≥ 80 tall  → 4×2+           → 3-coin multi-column
+         *  Medium everything else          → 3×2, 2×3 etc  → icon + price + sparkline
          */
         fun layoutForSize(options: Bundle): Int {
             val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
             val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
             return when {
-                minW < 110 || minH < 110 -> R.layout.widget_size_tiny   // 1×1, 2×1, 1×2
-                minW < 160 || minH < 160 -> R.layout.widget_size_small  // 1×3, 1×4, 3×1, 4×1, 2×2
-                else                     -> R.layout.widget_crypto      // 2×3+ / 3×2+ / 3×3+
+                minW < 80 || minH < 80           -> R.layout.widget_size_tiny   // 1×1, 2×1, 1×2
+                minW >= 176 && minH >= 80        -> R.layout.widget_size_wide   // 4×2+ multi-coin
+                minW < 150 && minH < 150         -> R.layout.widget_size_small  // 2×2, narrow/short
+                else                             -> R.layout.widget_size_medium // 3×2, 2×3, etc.
             }
         }
+
+        /** Whether this layout is the wide multi-coin variant. */
+        fun isWideLayout(options: Bundle) = layoutForSize(options) == R.layout.widget_size_wide
 
         /** Convenience to get options then pick layout. */
         fun layoutForWidget(manager: AppWidgetManager, widgetId: Int): Int =
             layoutForSize(manager.getAppWidgetOptions(widgetId))
+
+        fun isWideWidget(manager: AppWidgetManager, widgetId: Int): Boolean =
+            isWideLayout(manager.getAppWidgetOptions(widgetId))
     }
 
     // ── onUpdate ────────────────────────────────────────────────────────────
@@ -54,7 +64,12 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
         for (widgetId in appWidgetIds) {
             val symbol = prefs.getString("widget_${widgetId}_symbol", "BTCUSDT") ?: "BTCUSDT"
-            val baseAsset = symbol.removeSuffix("USDT").removeSuffix("BUSD").removeSuffix("BTC")
+            val baseAsset = when {
+                symbol.endsWith("USDT") -> symbol.removeSuffix("USDT")
+                symbol.endsWith("BUSD") -> symbol.removeSuffix("BUSD")
+                symbol.endsWith("BTC")  -> symbol.removeSuffix("BTC")
+                else -> symbol
+            }
 
             val layoutId = layoutForWidget(appWidgetManager, widgetId)
             val views = RemoteViews(context.packageName, layoutId)
@@ -75,11 +90,17 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(widgetId, views)
 
             // Ensure PriceService is running for live 1-second tick updates
-            val serviceIntent = Intent(context, PriceService::class.java)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
-                context.startForegroundService(serviceIntent)
-            else
-                context.startService(serviceIntent)
+            // Wrapped in try/catch: startForegroundService can throw IllegalStateException
+            // on Android 12+ when the app is considered to be in the background
+            // (which is common when called from a BroadcastReceiver / onUpdate).
+            // Without this guard the entire onUpdate crashes → "Can't load widget".
+            try {
+                val serviceIntent = Intent(context, PriceService::class.java)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                    context.startForegroundService(serviceIntent)
+                else
+                    context.startService(serviceIntent)
+            } catch (_: Exception) { }
         }
     }
 
@@ -95,7 +116,12 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
     ) {
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
         val symbol = prefs.getString("widget_${appWidgetId}_symbol", "BTCUSDT") ?: "BTCUSDT"
-        val baseAsset = symbol.removeSuffix("USDT").removeSuffix("BUSD").removeSuffix("BTC")
+        val baseAsset = when {
+            symbol.endsWith("USDT") -> symbol.removeSuffix("USDT")
+            symbol.endsWith("BUSD") -> symbol.removeSuffix("BUSD")
+            symbol.endsWith("BTC")  -> symbol.removeSuffix("BTC")
+            else -> symbol
+        }
 
         val layoutId = layoutForSize(newOptions)
         val views = RemoteViews(context.packageName, layoutId)
@@ -114,11 +140,13 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
 
         // Kick PriceService to push a fresh update for this widget
-        val serviceIntent = Intent(context, PriceService::class.java)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
-            context.startForegroundService(serviceIntent)
-        else
-            context.startService(serviceIntent)
+        try {
+            val serviceIntent = Intent(context, PriceService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                context.startForegroundService(serviceIntent)
+            else
+                context.startService(serviceIntent)
+        } catch (_: Exception) { }
 
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
     }

@@ -3,7 +3,7 @@
     android:minWidth="40dp"
     android:minHeight="136dp"
     android:updatePeriodMillis="0"
-    android:initialLayout="@layout/widget_crypto"
+    android:initialLayout="@layout/widget_size_tiny"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:configure="com.rajvir.FuturesTracker.WidgetConfigActivity"/>

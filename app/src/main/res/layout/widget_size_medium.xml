@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  SMALL layout — matches screenshot 2 (2×2, 1×3, 1×4)
-  Dark pill | row: [BTC icon  SYMBOL/USD  %change] | giant price | row: [time + refresh | gear]
-  No sparkline.
+  MEDIUM layout — matches screenshot 3 (3×2, 2×3, 4×2 single-coin)
+  Dark pill | row: [BTC icon  SYMBOL/USD  %change] | row: [giant price | sparkline] | row: [time + refresh | gear]
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rootLayout"
@@ -10,24 +9,21 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg_dark"
     android:orientation="vertical"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <!-- Multi-coin stubs (not visible in small layout) -->
+    <!-- Multi-coin stubs -->
     <TextView  android:id="@+id/tvSymbol2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvPrice2"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvChange2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvSymbol3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvPrice3"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvChange3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <!-- Sparkline stub -->
-    <ImageView android:id="@+id/imgGraph"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
-    <!-- tvName stub -->
     <TextView  android:id="@+id/tvName"    android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
 
-    <!-- Row 1: [coin icon] [SYMBOL/USD] [%change right-aligned] -->
+    <!-- Row 1: [BTC icon] [SYMBOL/USD] [%change] -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -35,7 +31,6 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <!-- BTC circle icon -->
         <ImageView
             android:id="@+id/imgLogo"
             android:layout_width="22dp"
@@ -45,7 +40,6 @@
             android:padding="4dp"
             android:scaleType="centerInside"/>
 
-        <!-- SYMBOL/USD label -->
         <TextView
             android:id="@+id/tvSymbol"
             android:layout_width="0dp"
@@ -60,12 +54,11 @@
             android:autoSizeMinTextSize="8sp"
             android:autoSizeMaxTextSize="14sp"/>
 
-        <!-- % change (green) -->
         <TextView
             android:id="@+id/tvChange"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="7.41%"
+            android:text="7.43%"
             android:textColor="#10B981"
             android:textStyle="bold"
             android:textSize="12sp"
@@ -74,22 +67,39 @@
             android:autoSizeMaxTextSize="14sp"/>
     </LinearLayout>
 
-    <!-- Row 2: Giant price -->
-    <TextView
-        android:id="@+id/tvPrice"
+    <!-- Row 2: [Giant price (left)] [Sparkline (right)] -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2.5"
-        android:gravity="center_vertical|start"
-        android:text="0.00"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-medium"
-        android:autoSizeTextType="uniform"
-        android:autoSizeMinTextSize="14sp"
-        android:autoSizeMaxTextSize="48sp"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-    <!-- Row 3: [timestamp + refresh icon] [gear/settings icon] -->
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.4"
+            android:gravity="center_vertical|start"
+            android:text="0.00"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="14sp"
+            android:autoSizeMaxTextSize="44sp"/>
+
+        <!-- Sparkline chart on the right -->
+        <ImageView
+            android:id="@+id/imgGraph"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true"/>
+    </LinearLayout>
+
+    <!-- Row 3: [timestamp + refresh icon] [gear icon] -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

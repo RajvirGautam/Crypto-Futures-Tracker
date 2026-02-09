@@ -5,8 +5,8 @@ import android.graphics.*
 object SparklineRenderer {
 
     fun render(data: List<Float>, positive: Boolean): Bitmap {
-        val width = 800
-        val height = 300
+        val width = 400
+        val height = 150
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
 
