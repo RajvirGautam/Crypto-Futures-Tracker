@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.view.View
 import android.widget.RemoteViews
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -22,29 +21,42 @@ object WidgetUpdater {
 
     private val symbolCacheMap = mutableMapOf<String, SymbolCache>()
 
-    // Fixed secondary coins shown in the wide multi-coin layout
-    private const val COIN2 = "ETHUSDT"
-    private const val COIN3 = "BNBUSDT"
-
     private val decFmt = DecimalFormat("#,##0.00")
     private val pctFmt = DecimalFormat("0.00")
 
     // ── helpers ─────────────────────────────────────────────────────────────
 
-    private fun displayLabel(symbol: String): String {
-        val quote = when {
-            symbol.endsWith("USDT") -> "USDT"
-            symbol.endsWith("BUSD") -> "BUSD"
-            symbol.endsWith("BTC")  -> "BTC"
-            else                    -> ""
-        }
-        val base = if (quote.isNotEmpty()) symbol.removeSuffix(quote) else symbol
-        val displayQuote = when (quote) {
-            "USDT", "BUSD" -> "USD"
-            "BTC"          -> "BTC"
-            else           -> "USD"
-        }
-        return "$base/$displayQuote"
+    private fun baseAsset(symbol: String): String = when {
+        symbol.endsWith("USDT") -> symbol.removeSuffix("USDT")
+        symbol.endsWith("BUSD") -> symbol.removeSuffix("BUSD")
+        symbol.endsWith("BTC")  -> symbol.removeSuffix("BTC")
+        else -> symbol
+    }
+
+    private fun quoteAsset(symbol: String): String = when {
+        symbol.endsWith("USDT") -> "USDT"
+        symbol.endsWith("BUSD") -> "BUSD"
+        symbol.endsWith("BTC")  -> "BTC"
+        else -> "USDT"
+    }
+
+    private val coinNames = mapOf(
+        "BTC" to "Bitcoin", "ETH" to "Ethereum", "BNB" to "BNB",
+        "SOL" to "Solana", "XRP" to "XRP", "DOGE" to "Dogecoin",
+        "ADA" to "Cardano", "AVAX" to "Avalanche", "DOT" to "Polkadot",
+        "LINK" to "Chainlink", "MATIC" to "Polygon", "POL" to "Polygon",
+        "UNI" to "Uniswap", "LTC" to "Litecoin", "ATOM" to "Cosmos",
+        "FIL" to "Filecoin", "APT" to "Aptos", "ARB" to "Arbitrum",
+        "OP" to "Optimism", "NEAR" to "NEAR", "SUI" to "Sui",
+        "PEPE" to "Pepe", "WIF" to "dogwifhat", "SHIB" to "Shiba Inu",
+        "TRX" to "TRON", "TON" to "Toncoin", "SEI" to "Sei",
+        "USDT" to "Tether", "BUSD" to "BUSD"
+    )
+
+    private fun fullPairName(symbol: String): String {
+        val base = baseAsset(symbol)
+        val quote = quoteAsset(symbol)
+        return "${coinNames[base] ?: base} / ${coinNames[quote] ?: quote}"
     }
 
     private fun changeColor(isPositive: Boolean) =
@@ -74,6 +86,11 @@ object WidgetUpdater {
         return "$sign${pctFmt.format(pct)}%"
     }
 
+    private fun formatAbsAndPct(absChange: Float, pctChange: Float): String {
+        val sign = if (absChange >= 0) "+" else ""
+        return "${sign}${decFmt.format(absChange)}  ·  ${pctFmt.format(kotlin.math.abs(pctChange))}%"
+    }
+
     // ── main update entry point ──────────────────────────────────────────────
 
     suspend fun updateAllWidgets(context: Context) {
@@ -98,92 +115,36 @@ object WidgetUpdater {
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
         val timeStr = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date()).lowercase()
 
-        // Pre-fetch BTC + ETH once for all wide widgets this tick
-        var btcData: Triple<Float, Float, Float>? = null
-        var ethData: Triple<Float, Float, Float>? = null
-        val needsWide = widgetIds.any { BaseWidgetProvider.isWideWidget(appWidgetManager, it) }
-        if (needsWide) {
-            try { btcData = fetchAndCache("BTCUSDT") } catch (_: Exception) { }
-            try { ethData = fetchAndCache(COIN2) } catch (_: Exception) { }
-        }
-
         for (widgetId in widgetIds) {
             val symbol = prefs.getString("widget_${widgetId}_symbol", "BTCUSDT") ?: "BTCUSDT"
             val layoutId = BaseWidgetProvider.layoutForWidget(appWidgetManager, widgetId)
-            val isWide = layoutId == R.layout.widget_size_wide
 
             try {
                 val (currentPrice, changeAbs, changePct) = fetchAndCache(symbol)
                 val isPositive = changeAbs >= 0
                 val priceStr = decFmt.format(currentPrice)
-                val changePctStr = formatChange(changePct)
 
                 val views = RemoteViews(context.packageName, layoutId)
 
-                // ── Column 1 / primary coin ──
-                views.setTextViewText(R.id.tvSymbol, displayLabel(symbol))
+                // ── Populate all fields ──
+                views.setTextViewText(R.id.tvSymbol, baseAsset(symbol))
+                views.setTextViewText(R.id.tvName, fullPairName(symbol))
                 views.setTextViewText(R.id.tvPrice, priceStr)
-                views.setTextViewText(R.id.tvChange, changePctStr)
-                views.setTextColor(R.id.tvChange, changeColor(isPositive))
+                views.setTextViewText(R.id.tvQuote, quoteAsset(symbol))
                 views.setTextViewText(R.id.tvTime, timeStr)
 
-                // Sparkline — medium layout only
-                if (layoutId == R.layout.widget_size_medium) {
+                // Change text: abs+pct for large layouts, just pct for compact
+                if (layoutId == R.layout.widget_size_wide || layoutId == R.layout.widget_size_medium) {
+                    views.setTextViewText(R.id.tvChange, formatAbsAndPct(changeAbs, changePct))
+                } else {
+                    views.setTextViewText(R.id.tvChange, formatChange(changePct))
+                }
+                views.setTextColor(R.id.tvChange, changeColor(isPositive))
+
+                // Sparkline — shown on medium and wide layouts
+                if (layoutId == R.layout.widget_size_medium || layoutId == R.layout.widget_size_wide) {
                     symbolCacheMap[symbol]?.sparkline?.let {
                         views.setImageViewBitmap(R.id.imgGraph, it)
-                    }
-                }
-
-                // ── Wide multi-coin: override col1 → BTC, and fill col2 + col3 ──
-                if (isWide) {
-                    // Col 1: always BTC
-                    val c1Symbol = "BTCUSDT"
-                    val c1 = if (symbol == c1Symbol) Triple(currentPrice, changeAbs, changePct)
-                              else (btcData ?: Triple(0f, 0f, 0f))
-                    views.setTextViewText(R.id.tvSymbol, displayLabel(c1Symbol))
-                    views.setTextViewText(R.id.tvPrice, decFmt.format(c1.first))
-                    views.setTextViewText(R.id.tvChange, formatChange(c1.third))
-                    views.setTextColor(R.id.tvChange, changeColor(c1.second >= 0))
-
-                    // Col 2: always ETH
-                    val c2 = ethData ?: Triple(0f, 0f, 0f)
-                    views.setTextViewText(R.id.tvSymbol2, displayLabel(COIN2))
-                    views.setTextViewText(R.id.tvPrice2, decFmt.format(c2.first))
-                    views.setTextViewText(R.id.tvChange2, formatChange(c2.third))
-                    views.setTextColor(R.id.tvChange2, changeColor(c2.second >= 0))
-
-                    // Col 3: configured coin, or BNB if same as BTC/ETH
-                    val c3Symbol = when (symbol) {
-                        "BTCUSDT", "ETHUSDT" -> COIN3
-                        else                  -> symbol
-                    }
-                    val c3 = if (c3Symbol == symbol) Triple(currentPrice, changeAbs, changePct)
-                              else try { fetchAndCache(c3Symbol) } catch (_: Exception) { Triple(0f, 0f, 0f) }
-                    views.setTextViewText(R.id.tvSymbol3, displayLabel(c3Symbol))
-                    views.setTextViewText(R.id.tvPrice3, decFmt.format(c3.first))
-                    views.setTextViewText(R.id.tvChange3, formatChange(c3.third))
-                    views.setTextColor(R.id.tvChange3, changeColor(c3.second >= 0))
-
-                    // Show sparklines per column when the widget is tall enough
-                    val wideOpts = appWidgetManager.getAppWidgetOptions(widgetId)
-                    val wideMinH = wideOpts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
-                    if (wideMinH >= 150) {
-                        views.setViewVisibility(R.id.imgGraph, View.VISIBLE)
-                        views.setViewVisibility(R.id.imgGraph2, View.VISIBLE)
-                        views.setViewVisibility(R.id.imgGraph3, View.VISIBLE)
-                        symbolCacheMap[c1Symbol]?.sparkline?.let {
-                            views.setImageViewBitmap(R.id.imgGraph, it)
-                        }
-                        symbolCacheMap[COIN2]?.sparkline?.let {
-                            views.setImageViewBitmap(R.id.imgGraph2, it)
-                        }
-                        symbolCacheMap[c3Symbol]?.sparkline?.let {
-                            views.setImageViewBitmap(R.id.imgGraph3, it)
-                        }
-                    } else {
-                        views.setViewVisibility(R.id.imgGraph, View.GONE)
-                        views.setViewVisibility(R.id.imgGraph2, View.GONE)
-                        views.setViewVisibility(R.id.imgGraph3, View.GONE)
                     }
                 }
 

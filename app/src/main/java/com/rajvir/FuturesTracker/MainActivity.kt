@@ -1,40 +1,52 @@
 package com.rajvir.FuturesTracker
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.rajvir.FuturesTracker.R
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.slider.Slider // Use Material Slider
-import com.rajvir.FuturesTracker.ApiClient
-import com.rajvir.FuturesTracker.PriceService
-// import com.rajvir.FuturesTracker.PriceService
-import kotlinx.coroutines.*
-import androidx.work.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
-    private var running = false
-    private var previewJob: Job? = null
-    private var symbolsLoaded = false
+    private lateinit var webViewChart: WebView
+    private lateinit var rvCoins: RecyclerView
+    private lateinit var coinAdapter: CoinAdapter
+    private var pricesJob: Job? = null
+    private var currentSymbol = "BINANCE:BTCUSDT"
+    private var currentInterval = "D"
+    private val periodButtons = mutableListOf<TextView>()
+    
+    // Mock user coins. First one is dynamic based on selected.
+    private val portfolioCoins = mutableListOf(
+        CoinItem("BTCUSDT", "Bitcoin", "0.2157 BTC", 0.0, 0.0, 0.0),
+        CoinItem("SOLUSDT", "Solana", "258.1901 SOL", 0.0, 0.0, 0.0)
+    )
 
-
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -42,153 +54,140 @@ class MainActivity : AppCompatActivity() {
         // Edge-to-edge handling
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, i ->
             val bars = i.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, bars.top, 0, 0) // Only pad top, let bottom flow behind nav bar
+            v.setPadding(0, bars.top, 0, 0)
             i
         }
 
         prefs = getSharedPreferences("crypto_prefs", MODE_PRIVATE)
 
-        val etSymbol = findViewById<AutoCompleteTextView>(R.id.etSymbol)
-        val slider = findViewById<Slider>(R.id.seekDigits) // Changed to Material Slider
-        val tvPrice = findViewById<TextView>(R.id.tvPricePreview)
-        val tvDigits = findViewById<TextView>(R.id.tvDigitPreview)
-        val btn = findViewById<MaterialButton>(R.id.btnToggle)
-        val status = findViewById<TextView>(R.id.tvStatus)
+        // Setup WebView
+        webViewChart = findViewById(R.id.webViewChart)
+        webViewChart.settings.javaScriptEnabled = true
+        webViewChart.settings.domStorageEnabled = true
+        webViewChart.settings.loadWithOverviewMode = true
+        webViewChart.settings.useWideViewPort = true
+        webViewChart.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        webViewChart.settings.mediaPlaybackRequiresUserGesture = false
+        webViewChart.setLayerType(WebView.LAYER_TYPE_HARDWARE, null)
+        webViewChart.webViewClient = WebViewClient()
+        webViewChart.webChromeClient = WebChromeClient()
+        
+        loadChart("BINANCE:BTCUSDT", "D")
+        
+        // Setup period selector buttons
+        setupPeriodSelectors()
 
-        etSymbol.setText(prefs.getString("symbol", "XRPUSDT"))
-
-        // Material Slider works with floats
-        slider.value = prefs.getInt("digit_start_index", 0).toFloat()
-
-        loadSymbols(etSymbol)
-
-        etSymbol.setOnClickListener {
-            if (symbolsLoaded) {
-                etSymbol.showDropDown()
-            }
+        // Setup RecyclerView
+        rvCoins = findViewById(R.id.rvCoins)
+        rvCoins.layoutManager = LinearLayoutManager(this)
+        coinAdapter = CoinAdapter { symbol ->
+            // On coin click, switch chart
+            currentSymbol = "BINANCE:${symbol}"
+            loadChart(currentSymbol, currentInterval)
         }
-
-        findViewById<MaterialButton>(R.id.btnAddWidget).setOnClickListener {
-            val intent = Intent(this, WidgetConfigActivity::class.java)
-            startActivity(intent)
-        }
-
-        etSymbol.setOnItemClickListener { _, _, _, _ ->
-            prefs.edit().putString("symbol", etSymbol.text.toString()).apply()
-        }
-
-        fun refreshPreview(price: Double) {
-            val raw = String.format("%.4f", price)
-            val clean = raw.replace(".", "")
-
-            // Slider returns float, cast to int
-            val currentIndex = slider.value.toInt()
-            val start = currentIndex.coerceAtMost(clean.length - 3)
-
-            val spannable = SpannableString(raw)
-            var mapIndex = 0
-
-            for (i in raw.indices) {
-                if (raw[i] != '.') {
-                    if (mapIndex in start until start + 3) {
-                        // Use Binance Yellow for highlight
-                        spannable.setSpan(
-                            ForegroundColorSpan(Color.parseColor("#F0B90B")),
-                            i, i + 1,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                    } else {
-                        // Dim unselected digits
-                        spannable.setSpan(
-                            ForegroundColorSpan(Color.parseColor("#44FFFFFF")),
-                            i, i + 1,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                    }
-                    mapIndex++
-                }
-            }
-
-            tvPrice.text = spannable
-            tvDigits.text = "STATUS BAR: [ ${clean.substring(start, start + 3)} ]"
-        }
-
-        slider.addOnChangeListener { _, value, _ ->
-            prefs.edit().putInt("digit_start_index", value.toInt()).apply()
-        }
-
-        previewJob = CoroutineScope(Dispatchers.IO).launch {
-            while (isActive) {
-                try {
-                    val symbol = etSymbol.text.toString().uppercase()
-                    if(symbol.isNotEmpty()) {
-                        val price = ApiClient.api.getFuturesPrice(symbol).markPrice.toDouble()
-                        withContext(Dispatchers.Main) {
-                            refreshPreview(price)
-                        }
-                    }
-                } catch (_: Exception) {}
-                delay(1000)
-            }
-        }
-
-        fun updateUIState(isRunning: Boolean) {
-            running = isRunning
-            if (running) {
-                btn.text = "DEACTIVATE MONITOR"
-                btn.setBackgroundColor(Color.parseColor("#1E2329")) // Dark
-                btn.setTextColor(Color.parseColor("#F6465D")) // Red Text
-                btn.strokeColor = ContextCompat.getColorStateList(this, R.color.glass_stroke)
-                btn.strokeWidth = 2
-                status.text = "• SYSTEM ACTIVE •"
-                status.setTextColor(Color.parseColor("#0ECB81"))
-            } else {
-                btn.text = "ACTIVATE MONITOR"
-                btn.setBackgroundColor(Color.parseColor("#F0B90B")) // Yellow
-                btn.setTextColor(Color.BLACK)
-                status.text = "System Standby"
-                status.setTextColor(Color.parseColor("#848E9C"))
-            }
-        }
-
-        // Check if service is actually running (simple boolean toggle for now)
-        // Ideally you check ActivityManager, but for this scope boolean is fine if app stays in memory
-        updateUIState(running)
-
-        btn.setOnClickListener {
-            if (!running) {
-                prefs.edit()
-                    .putString("symbol", etSymbol.text.toString().uppercase())
-                    .apply()
-
+        rvCoins.adapter = coinAdapter
+        coinAdapter.submitList(portfolioCoins.toList())
+        
+        // Setup bottom nav actions
+        findViewById<android.view.View>(R.id.fabAddTracker).setOnClickListener {
+            val bottomSheet = AddTrackerBottomSheet {
                 requestPermissionAndStart()
-                updateUIState(true)
+            }
+            bottomSheet.show(supportFragmentManager, "AddTrackerBottomSheet")
+        }
+        
+        startPricesPolling()
+    }
+    
+    private fun loadChart(symbol: String, interval: String) {
+        currentSymbol = symbol
+        currentInterval = interval
+        val encodedSymbol = android.net.Uri.encode(symbol)
+        val url = "https://s.tradingview.com/widgetembed/?frameElementId=tradingview_chart" +
+            "&symbol=$encodedSymbol" +
+            "&interval=$interval" +
+            "&hidetoptoolbar=0" +
+            "&hidelegend=0" +
+            "&saveimage=0" +
+            "&toolbarbg=F5F5F5" +
+            "&theme=light" +
+            "&style=1" +
+            "&timezone=Etc%2FUTC" +
+            "&withdateranges=1" +
+            "&showpopupbutton=0" +
+            "&studies=MAExp%407%7CMAExp%4025%7CMAExp%4099" +
+            "&locale=en" +
+            "&utm_source=cryptostatus" +
+            "&utm_medium=widget_new" +
+            "&utm_campaign=chart" +
+            "&allow_symbol_change=0"
+        webViewChart.loadUrl(url)
+    }
+    
+    private fun setupPeriodSelectors() {
+        val btn1W = findViewById<TextView>(R.id.btnPeriod1W)
+        val btn1M = findViewById<TextView>(R.id.btnPeriod1M)
+        val btn3M = findViewById<TextView>(R.id.btnPeriod3M)
+        val btn6M = findViewById<TextView>(R.id.btnPeriod6M)
+        val btn1Y = findViewById<TextView>(R.id.btnPeriod1Y)
+        val btnAll = findViewById<TextView>(R.id.btnPeriodAll)
+        
+        periodButtons.addAll(listOf(btn1W, btn1M, btn3M, btn6M, btn1Y, btnAll))
+        
+        // Map buttons to TradingView intervals
+        val intervalMap = mapOf(
+            btn1W to "60",    // 1 hour candles for 1W view
+            btn1M to "D",     // Daily candles for 1M view
+            btn3M to "D",     // Daily candles for 3M view
+            btn6M to "W",     // Weekly candles for 6M view
+            btn1Y to "W",     // Weekly candles for 1Y view
+            btnAll to "M"     // Monthly candles for ALL view
+        )
+        
+        // Default selection: 1M
+        highlightPeriodButton(btn1M)
+        
+        for ((button, interval) in intervalMap) {
+            button.setOnClickListener {
+                highlightPeriodButton(button)
+                loadChart(currentSymbol, interval)
+            }
+        }
+    }
+    
+    private fun highlightPeriodButton(selected: TextView) {
+        for (btn in periodButtons) {
+            if (btn == selected) {
+                btn.setTextColor(ContextCompat.getColor(this, R.color.home_text_primary))
+                btn.setTypeface(null, Typeface.BOLD)
             } else {
-                stopService(Intent(this, PriceService::class.java))
-                updateUIState(false)
+                btn.setTextColor(ContextCompat.getColor(this, R.color.home_text_secondary))
+                btn.setTypeface(null, Typeface.NORMAL)
             }
         }
     }
 
-    private fun loadSymbols(et: AutoCompleteTextView) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val info = ApiClient.api.getExchangeInfo()
-                val symbols = info.symbols
-                    .filter { it.contractType == "PERPETUAL" && it.status == "TRADING" }
-                    .map { it.symbol }
-                    .sorted()
-
-                withContext(Dispatchers.Main) {
-                    val adapter = ArrayAdapter(
-                        this@MainActivity,
-                        android.R.layout.simple_dropdown_item_1line, // Keep simple layout for dropdown
-                        symbols
-                    )
-                    et.setAdapter(adapter)
-                    symbolsLoaded = true
-                }
-            } catch (_: Exception) {}
+    private fun startPricesPolling() {
+        pricesJob = CoroutineScope(Dispatchers.IO).launch {
+            while (isActive) {
+                try {
+                    val updatedCoins = portfolioCoins.map { coin ->
+                        try {
+                            val ticker = ApiClient.api.get24hTicker(coin.symbol)
+                            val price = ticker.lastPrice?.toDoubleOrNull() ?: 0.0
+                            val changeRaw = ticker.priceChange?.toDoubleOrNull() ?: 0.0
+                            val changePct = ticker.priceChangePercent?.toDoubleOrNull() ?: 0.0
+                            coin.copy(price = price, priceChangeRaw = changeRaw, priceChangePercent = changePct)
+                        } catch(e:Exception){
+                            coin
+                        }
+                    }
+                    withContext(Dispatchers.Main) {
+                        coinAdapter.submitList(updatedCoins)
+                    }
+                } catch (e: Exception) {}
+                delay(2000)
+            }
         }
     }
 
@@ -208,8 +207,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        previewJob?.cancel()
+        pricesJob?.cancel()
         super.onDestroy()
     }
 }
-

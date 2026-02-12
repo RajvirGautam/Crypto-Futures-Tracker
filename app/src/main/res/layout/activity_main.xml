@@ -1,223 +1,178 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_deep"
+    android:background="@color/home_bg"
     android:fitsSystemWindows="true">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="100dp">
+        android:fillViewport="true"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp">
+            android:orientation="vertical">
 
-            <TextView
+            <!-- Portfolio Balance (Simplified Header) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$75,640.74"
+                    android:textColor="@color/home_text_primary"
+                    android:textSize="48sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="+2.04%  ($1,543.72)"
+                    android:textColor="@color/neon_green"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Chart Section (Expanded) -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:layout_marginTop="24dp">
+
+                <WebView
+                    android:id="@+id/webViewChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
+
+            <!-- Period Selectors -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.05"
-                android:lineSpacingExtra="-4dp"
-                android:text="FUTURES MONITOR"
-                android:textColor="@color/white"
-                android:textSize="32sp" />
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                android:orientation="horizontal">
 
-            <com.google.android.material.card.MaterialCardView
+                <TextView
+                    android:id="@+id/btnPeriod1W"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="1W"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnPeriod1M"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="1M"
+                    android:textColor="@color/home_text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnPeriod3M"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="3M"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnPeriod6M"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="6M"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnPeriod1Y"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="1Y"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/btnPeriodAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="ALL"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
+            <!-- Coins List -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/glass_stroke"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp">
+                android:background="@drawable/bg_bottom_sheet"
+                android:orientation="vertical"
+                android:paddingTop="12dp"
+                android:paddingBottom="24dp">
 
-                <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCoins"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:text="SELECT CONTRACT"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:letterSpacing="0.1"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="12dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        app:boxBackgroundColor="@color/bg_input"
-                        app:boxStrokeColor="@color/binance_yellow"
-                        app:boxStrokeWidth="0dp"
-                        app:hintEnabled="false"
-                        app:boxCornerRadiusTopStart="8dp"
-                        app:boxCornerRadiusTopEnd="8dp"
-                        app:boxCornerRadiusBottomStart="8dp"
-                        app:boxCornerRadiusBottomEnd="8dp">
-
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/etSymbol"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="XRPUSDT"
-                            android:textColor="@color/white"
-                            android:padding="16dp"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:inputType="textCapCharacters"
-                            android:completionThreshold="1"
-                            android:background="@null"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <Space android:layout_width="match_parent" android:layout_height="24dp"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_card"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/glass_stroke"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/shape_dot_green" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:letterSpacing="0.1"
-                            android:text="LIVE PREVIEW"
-                            android:textColor="@color/neon_green"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tvPricePreview"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:fontFamily="monospace"
-                        android:text="0.0000"
-                        android:textColor="@color/white"
-                        android:textSize="42sp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="24dp"
-                        android:background="@color/bg_input" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:letterSpacing="0.1"
-                        android:text="OFFSET CONFIGURATION"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/seekDigits"
-                        android:layout_width="match_parent"
-                        android:layout_height="82dp"
-                        android:stepSize="1"
-                        android:valueFrom="0"
-                        android:valueTo="10"
-                        app:haloColor="#33F0B90B"
-                        app:thumbColor="@color/binance_yellow"
-                        app:trackColorActive="@color/binance_yellow"
-                        app:trackColorInactive="@color/bg_input" />
-
-                    <TextView
-                        android:id="@+id/tvDigitPreview"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:fontFamily="monospace"
-                        android:text="Output: ---"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Floating Action Button for Adding Trackers -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddTracker"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@color/bg_card"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:src="@drawable/ic_refresh"
+        app:backgroundTint="@color/nav_bg"
+        app:tint="@color/white"
+        android:contentDescription="Add Tracker" />
 
-        <TextView
-            android:id="@+id/tvStatus"
-            android:text="System Standby"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:layout_marginBottom="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnToggle"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="ACTIVATE MONITOR"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/binance_yellow"
-            android:textColor="@color/black"
-            app:cornerRadius="8dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddWidget"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="ADD HOME SCREEN WIDGET"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            app:backgroundTint="@color/binance_yellow"
-            app:cornerRadius="8dp"
-            android:layout_marginTop="12dp"/>
-
-    </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

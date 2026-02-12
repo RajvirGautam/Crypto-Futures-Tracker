@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Futures Tracker</string>
+    <string name="add_tracker">Add Tracker</string>
 </resources>

@@ -12,5 +12,14 @@
     <color name="neon_red">#F6465D</color>
     <color name="text_secondary">#848E9C</color>
 
-    <color name="glass">#1AFFFFFF</color> <color name="glass_stroke">#33FFFFFF</color>
+    <color name="glass">#1AFFFFFF</color> 
+    <color name="glass_stroke">#33FFFFFF</color>
+
+    <!-- New Light Theme Colors -->
+    <color name="home_bg">#F5F5F5</color>
+    <color name="home_card">#FFFFFF</color>
+    <color name="home_text_primary">#1E2329</color>
+    <color name="home_text_secondary">#848E9C</color>
+    <color name="nav_bg">#1A1A1A</color>
+    <color name="nav_icon">#848E9C</color>
 </resources>

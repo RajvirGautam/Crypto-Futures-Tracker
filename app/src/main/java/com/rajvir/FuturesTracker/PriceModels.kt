@@ -14,6 +14,8 @@ data class LongShortRatio(
 )
 
 data class FuturesTicker24h(
-    val priceChangePercent: String,
+    val lastPrice: String?,
+    val priceChange: String?,
+    val priceChangePercent: String?,
     val openInterest: String? = null // optional, depends on endpoint
 )

@@ -14,9 +14,10 @@ import android.widget.RemoteViews
  * Adaptive layout selection based on actual rendered dp size reported by
  * AppWidgetManager.getAppWidgetOptions():
  *
- *   • Tiny  (either dim < 110 dp): symbol + price only         → widget_size_tiny
- *   • Small (either dim < 160 dp): symbol + price + change     → widget_size_small
- *   • Full  (otherwise)          : full sparkline layout       → widget_crypto
+ *   • Tiny  (either dim < 80 dp) : BTC + price + %            → widget_size_tiny
+ *   • Small (< 150 dp both)      : icon + BTC + price + %     → widget_size_small
+ *   • Medium                      : icon + name + chart + price → widget_size_medium
+ *   • Wide  (≥ 176 dp wide)      : full card with big chart   → widget_size_wide
  *
  * Also overrides onAppWidgetOptionsChanged so the layout re-selects when the
  * user drags to resize a widget that supports free resize.
@@ -27,31 +28,25 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         /**
          * Pick layout based on OPTION_APPWIDGET_MIN_WIDTH / MIN_HEIGHT (dp).
          *
-         *  Tiny   < 80 wide OR < 80 tall  → 1×1, 2×1, 1×2  → compact pill (symbol + price + %)
-         *  Small  ≥ 80 both, < 150 both   → 2×2, 1×3, 1×4  → icon + label + giant price + change + time
-         *  Wide   ≥ 176 wide & ≥ 80 tall  → 4×2+           → 3-coin multi-column
-         *  Medium everything else          → 3×2, 2×3 etc  → icon + price + sparkline
+     *  Tiny   < 80 wide OR < 80 tall  → 1×1, 2×1, 1×2  → BTC + price + %
+     *  Small  ≥ 80 both, < 150 both   → 2×2, 1×3, 1×4  → icon + BTC + price + %
+     *  Wide   ≥ 176 wide & ≥ 80 tall  → 4×2+           → full card: header + chart + price + sub-info
+     *  Medium everything else          → 3×2, 2×3 etc  → header + chart + price + change
          */
         fun layoutForSize(options: Bundle): Int {
             val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
             val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
             return when {
                 minW < 80 || minH < 80           -> R.layout.widget_size_tiny   // 1×1, 2×1, 1×2
-                minW >= 176 && minH >= 80        -> R.layout.widget_size_wide   // 4×2+ multi-coin
+                minW >= 176 && minH >= 80        -> R.layout.widget_size_wide   // 4×2+ single coin + large chart
                 minW < 150 && minH < 150         -> R.layout.widget_size_small  // 2×2, narrow/short
                 else                             -> R.layout.widget_size_medium // 3×2, 2×3, etc.
             }
         }
 
-        /** Whether this layout is the wide multi-coin variant. */
-        fun isWideLayout(options: Bundle) = layoutForSize(options) == R.layout.widget_size_wide
-
         /** Convenience to get options then pick layout. */
         fun layoutForWidget(manager: AppWidgetManager, widgetId: Int): Int =
             layoutForSize(manager.getAppWidgetOptions(widgetId))
-
-        fun isWideWidget(manager: AppWidgetManager, widgetId: Int): Boolean =
-            isWideLayout(manager.getAppWidgetOptions(widgetId))
     }
 
     // ── onUpdate ────────────────────────────────────────────────────────────

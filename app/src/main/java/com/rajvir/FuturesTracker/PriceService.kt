@@ -60,7 +60,7 @@ class PriceService : Service() {
 
                     val markPrice = premium.markPrice.toDouble()
                     val fundingRate = premium.lastFundingRate.toDouble() * 100
-                    val changePct = ticker.priceChangePercent.toDouble()
+                    val changePct = ticker.priceChangePercent?.toDoubleOrNull() ?: 0.0
 
                     val millisLeft = premium.nextFundingTime - System.currentTimeMillis()
                     val totalMinutes = (millisLeft / 60000).coerceAtLeast(0)
