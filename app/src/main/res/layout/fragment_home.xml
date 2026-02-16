@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/topSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="52dp"
+                android:background="#0A0D08">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/bg_search_field"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_search"
+                            android:contentDescription="Search"
+                            android:scaleType="fitCenter"/>
+
+                        <AutoCompleteTextView
+                            android:id="@+id/etSearch"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="10dp"
+                            android:background="@null"
+                            android:hint="Search a crypto..."
+                            android:textColorHint="#5A6E4A"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:singleLine="true"
+                            android:inputType="text"
+                            android:imeOptions="actionSearch"
+                            android:maxLines="1"
+                            android:dropDownWidth="match_parent"
+                            android:dropDownHorizontalOffset="0dp"
+                            android:dropDownVerticalOffset="8dp"
+                            android:popupBackground="#1F2620"
+                            android:completionThreshold="1"/>
+                    </LinearLayout>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="44dp">
+
+                    <TextView
+                        android:id="@+id/tvSearchedCoinName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bitcoin"
+                        android:textColor="#8AAF6A"
+                        android:textSize="16sp"
+                        android:letterSpacing="0.02"/>
+
+                    <TextView
+                        android:id="@+id/tvSearchedPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$0.00"
+                        android:textColor="#FFFFFF"
+                        android:textSize="52sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp"
+                        android:includeFontPadding="false"/>
+
+                    <TextView
+                        android:id="@+id/tvSearchedChange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textColor="#0ECB81"
+                        android:textSize="15sp"
+                        android:layout_marginTop="6dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnActivateNotifications"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:layout_marginTop="40dp"
+                    android:background="@drawable/bg_notify_btn"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/ivNotifBell"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_bell"
+                        android:contentDescription="Bell"
+                        android:layout_marginEnd="10dp"/>
+
+                    <TextView
+                        android:id="@+id/tvNotifButtonText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Activate Notification Tracker"
+                        android:textColor="#1A1A1A"
+                        android:textSize="15sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvNotifIntervalHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Update interval: 1s"
+                    android:textColor="#9AB58A"
+                    android:textSize="12sp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:background="@drawable/bg_search_field">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Price Alarm"
+                        android:textColor="#D7E8CA"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+
+                    <com.google.android.material.tabs.TabLayout
+                        android:id="@+id/tabAlarmMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:tabIndicatorColor="#8AAF6A"
+                        app:tabIndicatorHeight="2dp"
+                        app:tabMode="fixed"
+                        app:tabSelectedTextColor="#FFFFFF"
+                        app:tabTextColor="#7E9A69">
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="By Price" />
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="By % Change" />
+                    </com.google.android.material.tabs.TabLayout>
+
+                    <com.google.android.material.tabs.TabLayout
+                        android:id="@+id/tabAlarmDirection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        app:tabIndicatorColor="#8AAF6A"
+                        app:tabIndicatorHeight="2dp"
+                        app:tabMode="fixed"
+                        app:tabSelectedTextColor="#FFFFFF"
+                        app:tabTextColor="#7E9A69">
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Either" />
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Above" />
+
+                        <com.google.android.material.tabs.TabItem
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Below" />
+                    </com.google.android.material.tabs.TabLayout>
+
+                    <TextView
+                        android:id="@+id/tvAlarmCurrentPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Current: --"
+                        android:textColor="#A7BE97"
+                        android:textSize="12sp"/>
+
+                    <EditText
+                        android:id="@+id/etAlarmTarget"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_search_field"
+                        android:hint="Target price"
+                        android:importantForAutofill="no"
+                        android:inputType="numberDecimal"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#5A6E4A"
+                        android:textSize="14sp"/>
+
+                    <SeekBar
+                        android:id="@+id/seekAlarmTarget"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:max="1000"
+                        android:progress="500"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btnSetAlarm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_interval_option_selected"
+                            android:gravity="center"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:text="Set"
+                            android:textColor="#FFFFFF"
+                            android:textStyle="bold"
+                            android:textSize="13sp"/>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/swAlarmRepeat"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Repeat"
+                            android:textColor="#C6DAB7"
+                            android:textSize="12sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="Cooldown"
+                            android:textColor="#9FB992"
+                            android:textSize="12sp"/>
+
+                        <EditText
+                            android:id="@+id/etAlarmCooldownMin"
+                            android:layout_width="54dp"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="6dp"
+                            android:background="@drawable/bg_search_field"
+                            android:ems="2"
+                            android:inputType="number"
+                            android:text="5"
+                            android:textColor="#FFFFFF"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal"
+                        android:weightSum="6">
+
+                        <TextView android:id="@+id/tvPresetNeg5" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:gravity="center" android:text="-5%" android:textColor="#D0E1C4" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvPresetNeg3" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:gravity="center" android:text="-3%" android:textColor="#D0E1C4" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvPresetNeg1" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:gravity="center" android:text="-1%" android:textColor="#D0E1C4" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvPresetPos1" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:gravity="center" android:text="+1%" android:textColor="#D0E1C4" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvPresetPos3" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:gravity="center" android:text="+3%" android:textColor="#D0E1C4" android:textSize="11sp"/>
+                        <TextView android:id="@+id/tvPresetPos5" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:gravity="center" android:text="+5%" android:textColor="#D0E1C4" android:textSize="11sp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvAlarmSummary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="No alarms yet"
+                        android:textColor="#8FA881"
+                        android:textSize="12sp"/>
+
+                    <LinearLayout
+                        android:id="@+id/alarmListContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical"
+                    android:padding="14dp"
+                    android:background="@drawable/bg_search_field">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tracker Tools"
+                        android:textColor="#D7E8CA"
+                        android:textSize="14sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvLastUpdated"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Last updated: --"
+                        android:textColor="#9FB992"
+                        android:textSize="12sp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/swAutoRefresh"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Auto refresh"
+                            android:textColor="#C6DAB7"
+                            android:textSize="12sp"/>
+
+                        <TextView
+                            android:id="@+id/tvRefreshIntervalSelector"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:text="Interval: 3s"
+                            android:textColor="#D7E8CA"
+                            android:textSize="12sp"/>
+
+                        <TextView
+                            android:id="@+id/btnManualRefresh"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:background="@drawable/bg_interval_option_selected"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:paddingTop="5dp"
+                            android:paddingBottom="5dp"
+                            android:text="Refresh"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvSortModeSelector"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Sort: % Change"
+                        android:textColor="#D7E8CA"
+                        android:textSize="12sp"/>
+
+                    <TextView
+                        android:id="@+id/tvTopMoverInsight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Top mover: --"
+                        android:textColor="#9FB992"
+                        android:textSize="12sp"/>
+
+                    <TextView
+                        android:id="@+id/tvCopyHint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Tip: long-press main price to copy"
+                        android:textColor="#7F9B72"
+                        android:textSize="11sp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_white_card"
+                android:paddingTop="24dp"
+                android:paddingBottom="120dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Top Cryptos"
+                        android:textColor="#111111"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Price"
+                        android:textColor="#9E9E9E"
+                        android:textSize="13sp"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="#F0F0F0"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCoins"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:clipToPadding="false"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</FrameLayout>
