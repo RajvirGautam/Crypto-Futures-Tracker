@@ -179,6 +179,10 @@
             android:exported="true"/>
 
         <activity
+            android:name=".DashboardActivity"
+            android:exported="false"/>
+
+        <activity
             android:name="com.rajvir.FuturesTracker.MainActivity"
             android:exported="true">
             <intent-filter>
