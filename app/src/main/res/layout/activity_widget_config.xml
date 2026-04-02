@@ -1,27 +1,213 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetConfigRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:background="#0A0A0A"
+    android:fillViewport="true">
 
-    <AutoCompleteTextView
-        android:id="@+id/etWidgetSymbol"
-        android:layout_width="match_parent"
-        android:layout_height="78dp"
-        android:backgroundTint="#F0B90B"
-        android:hint="Select Contract (BTCUSDT)"
-        android:inputType="textCapCharacters"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#777777" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnWidgetDone"
+    <LinearLayout
+        android:id="@+id/widgetConfigContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#F0B90B"
-        android:text="ADD WIDGET"
-        android:textColor="#000000" />
-</LinearLayout>
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WIDGET SETTINGS"
+            android:textColor="#F0B90B"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.14"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="18dp"/>
+
+        <!-- ── Coin list (drag-to-reorder RecyclerView) ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Coins  (drag ≡ to reorder)"
+                android:textColor="#777777"
+                android:textSize="11sp"
+                android:letterSpacing="0.06"/>
+
+            <TextView
+                android:id="@+id/btnAddCoin"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:text="+ ADD"
+                android:textColor="#111111"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:gravity="center"
+                android:background="@drawable/bg_add_coin_button"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCoins"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- ── Decimal places ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Decimal places"
+                android:textColor="#777777"
+                android:textSize="11sp"
+                android:letterSpacing="0.06"/>
+
+            <TextView
+                android:id="@+id/tvDecimalsValue"
+                android:layout_width="32dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="2"
+                android:textColor="#AAAAAA"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvDecimalPricePreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Preview: --"
+            android:textColor="#B8B8B8"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:layout_marginBottom="8dp"/>
+
+        <SeekBar
+            android:id="@+id/seekDecimals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="8"
+            android:progress="2"
+            android:progressTint="#F0B90B"
+            android:thumbTint="#F0B90B"
+            android:layout_marginBottom="22dp"/>
+
+        <!-- ── Border opacity ── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Border opacity"
+                android:textColor="#777777"
+                android:textSize="11sp"
+                android:letterSpacing="0.06"/>
+
+            <TextView
+                android:id="@+id/tvBorderAlphaValue"
+                android:layout_width="42dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="25%"
+                android:textColor="#AAAAAA"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/seekBorderAlpha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="25"
+            android:progressTint="#F0B90B"
+            android:thumbTint="#F0B90B"
+            android:layout_marginBottom="22dp"/>
+
+        <!-- ── Update interval ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Widget update interval"
+            android:textColor="#777777"
+            android:textSize="11sp"
+            android:letterSpacing="0.06"
+            android:layout_marginBottom="8dp"/>
+
+        <AutoCompleteTextView
+            android:id="@+id/etWidgetInterval"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_glass"
+            android:hint="Select interval"
+            android:textColor="#F2F2F2"
+            android:textColorHint="#777777"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:gravity="center_vertical"
+            android:inputType="none"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- ── Graph timeframe ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Graph timeframe"
+            android:textColor="#777777"
+            android:textSize="11sp"
+            android:letterSpacing="0.06"
+            android:layout_marginBottom="8dp"/>
+
+        <AutoCompleteTextView
+            android:id="@+id/etGraphTimeframe"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_glass"
+            android:hint="Select graph timeframe"
+            android:textColor="#F2F2F2"
+            android:textColorHint="#777777"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:gravity="center_vertical"
+            android:inputType="none"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Save -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnWidgetDone"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:backgroundTint="#F0B90B"
+            android:text="SAVE WIDGET"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"/>
+
+    </LinearLayout>
+</ScrollView>
