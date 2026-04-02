@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.rajvir.FuturesTracker.ApiClient
 import com.rajvir.FuturesTracker.R
-import com.rajvir.FuturesTracker.MainActivity
 import kotlinx.coroutines.*
 import java.util.Locale
 
@@ -20,10 +19,13 @@ class PriceService : Service() {
     companion object {
         @Volatile
         private var started = false
+        const val ACTION_FORCE_WIDGET_REFRESH = "com.rajvir.FuturesTracker.FORCE_WIDGET_REFRESH"
     }
 
     private val channelId = "crypto_price_channel"
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var previousAlarmPrice: Double? = null
+    @Volatile private var forceNextWidgetRefresh = true
 
     override fun onCreate() {
         super.onCreate()
@@ -40,56 +42,95 @@ class PriceService : Service() {
         startPriceUpdates()
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_FORCE_WIDGET_REFRESH) {
+            forceNextWidgetRefresh = true
+        }
+        return START_STICKY
+    }
+
     private fun startPriceUpdates() {
         scope.launch {
+            var nextNotifUpdateAt = 0L
+
             while (isActive) {
                 try {
                     val prefs = getSharedPreferences("crypto_prefs", MODE_PRIVATE)
-                    val symbol = prefs.getString("symbol", "XRPUSDT")!!
+                    val now = System.currentTimeMillis()
+                    val notifActive = prefs.getBoolean("notif_tracker_active", false)
+                    val alarmActive = prefs.getBoolean(MainActivity.PREF_ALARM_ENABLED, false)
+                    val hasWidgets = WidgetUpdater.hasAnyWidgets(applicationContext)
 
-                    // Fetch Data
-                    val premiumDeffered = async { ApiClient.api.getFuturesPrice(symbol) }
-                    val tickerDeffered = async { ApiClient.api.get24hTicker(symbol) }
-                    val lsDeffered = async { ApiClient.api.getGlobalLongShortRatio(symbol) }
+                    if (!notifActive && !hasWidgets && !alarmActive) {
+                        stopSelf()
+                        break
+                    }
 
-                    val premium = premiumDeffered.await()
-                    val ticker = tickerDeffered.await()
-                    val lsList = lsDeffered.await()
-
-                    val ls = if (lsList.isNotEmpty()) lsList.first() else null
-
-                    val markPrice = premium.markPrice.toDouble()
-                    val fundingRate = premium.lastFundingRate.toDouble() * 100
-                    val changePct = ticker.priceChangePercent?.toDoubleOrNull() ?: 0.0
-
-                    val millisLeft = premium.nextFundingTime - System.currentTimeMillis()
-                    val totalMinutes = (millisLeft / 60000).coerceAtLeast(0)
-                    val h = totalMinutes / 60
-                    val m = totalMinutes % 60
-
-                    val longPct = (ls?.longAccount?.toDouble() ?: 0.0) * 100
-                    val shortPct = (ls?.shortAccount?.toDouble() ?: 0.0) * 100
-
-                    val iconText = getIconTextFromPrice(markPrice, prefs)
-
-                    updateCustomNotification(
-                        symbol,
-                        markPrice,
-                        changePct,
-                        fundingRate,
-                        h, m,
-                        longPct, shortPct,
-                        iconText
+                    val notifInterval = UpdateIntervals.byLabel(
+                        prefs.getString(UpdateIntervals.NOTIF_INTERVAL_KEY, "1s")
                     )
-                    
-                    // 🔹 Update the widget every single second natively!
-                    WidgetUpdater.updateAllWidgets(applicationContext)
+                    if (notifActive && now >= nextNotifUpdateAt) {
+                        val symbol = prefs.getString("symbol", "XRPUSDT")!!
+
+                        val premiumDeferred = async { ApiClient.api.getFuturesPrice(symbol) }
+                        val tickerDeferred = async { ApiClient.api.get24hTicker(symbol) }
+                        val lsDeferred = async {
+                            ApiClient.api.getGlobalLongShortRatio(
+                                symbol = symbol,
+                                period = notifInterval.longShortPeriod,
+                                limit = 1
+                            )
+                        }
+
+                        val premium = premiumDeferred.await()
+                        val ticker = tickerDeferred.await()
+                        val lsList = lsDeferred.await()
+                        val ls = if (lsList.isNotEmpty()) lsList.first() else null
+
+                        val markPrice = premium.markPrice.toDouble()
+                        val fundingRate = premium.lastFundingRate.toDouble() * 100
+                        val changePct = ticker.priceChangePercent?.toDoubleOrNull() ?: 0.0
+
+                        val millisLeft = premium.nextFundingTime - System.currentTimeMillis()
+                        val totalMinutes = (millisLeft / 60000).coerceAtLeast(0)
+                        val h = totalMinutes / 60
+                        val m = totalMinutes % 60
+
+                        val longPct = (ls?.longAccount?.toDouble() ?: 0.0) * 100
+                        val shortPct = (ls?.shortAccount?.toDouble() ?: 0.0) * 100
+
+                        val iconText = getIconTextFromPrice(markPrice, prefs)
+
+                        updateCustomNotification(
+                            symbol,
+                            markPrice,
+                            changePct,
+                            fundingRate,
+                            h, m,
+                            longPct, shortPct,
+                            iconText
+                        )
+
+                        nextNotifUpdateAt = now + notifInterval.millis
+                    }
+
+                    if (alarmActive) {
+                        checkAndTriggerAlarm(prefs)
+                    } else {
+                        previousAlarmPrice = null
+                    }
+
+                    if (hasWidgets) {
+                        val force = forceNextWidgetRefresh
+                        WidgetUpdater.updateAllWidgets(applicationContext, force)
+                        forceNextWidgetRefresh = false
+                    }
 
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
-                delay(1000)
+                delay(250)
             }
         }
     }
@@ -103,8 +144,9 @@ class PriceService : Service() {
         longPct: Double, shortPct: Double,
         iconText: String
     ) {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(this, DashboardActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(DashboardActivity.EXTRA_START_PAGE, DashboardActivity.PAGE_HOME)
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -171,6 +213,108 @@ class PriceService : Service() {
             .build()
 
         getSystemService(NotificationManager::class.java).notify(1, notification)
+    }
+
+    private suspend fun checkAndTriggerAlarm(prefs: SharedPreferences) {
+        val repeat = prefs.getBoolean(MainActivity.PREF_ALARM_REPEAT, false)
+        if (!repeat && prefs.getBoolean(MainActivity.PREF_ALARM_TRIGGERED, false)) {
+            previousAlarmPrice = null
+            return
+        }
+
+        val cooldownMin = prefs.getInt(MainActivity.PREF_ALARM_COOLDOWN_MIN, 5).coerceIn(1, 240)
+        val cooldownMs = cooldownMin * 60_000L
+        val now = System.currentTimeMillis()
+        val lastTriggerAt = prefs.getLong(MainActivity.PREF_ALARM_LAST_TRIGGER_AT, 0L)
+        if (repeat && lastTriggerAt > 0L && now - lastTriggerAt < cooldownMs) {
+            return
+        }
+
+        val symbol = prefs.getString(MainActivity.PREF_ALARM_SYMBOL, null)
+            ?: prefs.getString("symbol", "BTCUSDT")
+            ?: "BTCUSDT"
+
+        val currentPrice = try {
+            ApiClient.api.getFuturesPrice(symbol).markPrice.toDoubleOrNull() ?: return
+        } catch (_: Exception) {
+            return
+        }
+
+        val mode = prefs.getString(MainActivity.PREF_ALARM_MODE, "price") ?: "price"
+        val targetPrice = if (mode == "percent") {
+            val base = prefs.getFloat(MainActivity.PREF_ALARM_BASE_PRICE, 0f).toDouble()
+                .takeIf { it > 0 } ?: currentPrice
+            val pct = prefs.getFloat(MainActivity.PREF_ALARM_PERCENT, 1f).toDouble()
+            base * (1.0 + pct / 100.0)
+        } else {
+            prefs.getFloat(MainActivity.PREF_ALARM_TARGET_PRICE, 0f).toDouble()
+        }
+
+        if (targetPrice <= 0.0) {
+            previousAlarmPrice = currentPrice
+            return
+        }
+
+        val direction = prefs.getString(MainActivity.PREF_ALARM_DIRECTION, "either") ?: "either"
+
+        val prev = previousAlarmPrice
+        val crossedEither = when {
+            prev == null -> kotlin.math.abs(currentPrice - targetPrice) <= targetPrice * 0.0002
+            else -> (prev <= targetPrice && currentPrice >= targetPrice) ||
+                (prev >= targetPrice && currentPrice <= targetPrice)
+        }
+
+        val touched = if (!crossedEither) {
+            false
+        } else {
+            when (direction) {
+                "above" -> currentPrice >= targetPrice
+                "below" -> currentPrice <= targetPrice
+                else -> true
+            }
+        }
+
+        if (touched) {
+            sendAlarmHitNotification(symbol, currentPrice, targetPrice)
+            val edit = prefs.edit()
+                .putLong(MainActivity.PREF_ALARM_LAST_TRIGGER_AT, now)
+            if (repeat) {
+                edit.putBoolean(MainActivity.PREF_ALARM_TRIGGERED, false)
+            } else {
+                edit.putBoolean(MainActivity.PREF_ALARM_TRIGGERED, true)
+                edit.putBoolean(MainActivity.PREF_ALARM_ENABLED, false)
+            }
+            edit.apply()
+            previousAlarmPrice = null
+        } else {
+            previousAlarmPrice = currentPrice
+        }
+    }
+
+    private fun sendAlarmHitNotification(symbol: String, currentPrice: Double, targetPrice: Double) {
+        val intent = Intent(this, DashboardActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(DashboardActivity.EXTRA_START_PAGE, DashboardActivity.PAGE_HOME)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            1002,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val body = "$symbol touched ${String.format(Locale.US, "$%,.4f", targetPrice)} (now ${String.format(Locale.US, "$%,.4f", currentPrice)})"
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_bell)
+            .setContentTitle("Price alarm triggered")
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        getSystemService(NotificationManager::class.java).notify(1002, notification)
     }
 
     // ... (Keep existing getIconTextFromPrice, buildNotification, createNotificationChannel, buildPriceIcon, onDestroy) ...

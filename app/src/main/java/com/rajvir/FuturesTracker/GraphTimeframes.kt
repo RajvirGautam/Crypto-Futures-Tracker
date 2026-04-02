@@ -8,6 +8,8 @@ data class GraphTimeframeOption(
 object GraphTimeframes {
 
     private val options = listOf(
+        // Binance klines do not support 1s; map to 1m as nearest interval.
+        GraphTimeframeOption("1s", "1m"),
         // Binance klines do not support 30s; map to 1m as nearest interval.
         GraphTimeframeOption("30s", "1m"),
         GraphTimeframeOption("1m", "1m"),
