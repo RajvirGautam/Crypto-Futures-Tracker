@@ -56,47 +56,20 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+        // Delegate to WidgetUpdater which handles multi-coin widgets with graphs,
+        // decimal formatting, border opacity, and graph timeframe selection
         for (widgetId in appWidgetIds) {
-            val symbol = prefs.getString("widget_${widgetId}_symbol", "BTCUSDT") ?: "BTCUSDT"
-            val baseAsset = when {
-                symbol.endsWith("USDT") -> symbol.removeSuffix("USDT")
-                symbol.endsWith("BUSD") -> symbol.removeSuffix("BUSD")
-                symbol.endsWith("BTC")  -> symbol.removeSuffix("BTC")
-                else -> symbol
-            }
-
-            val layoutId = layoutForWidget(appWidgetManager, widgetId)
-            val views = RemoteViews(context.packageName, layoutId)
-            views.setTextViewText(R.id.tvSymbol, baseAsset)
-            views.setTextViewText(R.id.tvPrice, "Loading...")
-
-            // Wire tap-to-refresh using the subclass's concrete class so the right
-            // provider broadcast receiver handles the intent.
-            val refreshIntent = Intent(context, this::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(widgetId))
-            }
-            val pi = PendingIntent.getBroadcast(
-                context, widgetId, refreshIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            views.setOnClickPendingIntent(R.id.rootLayout, pi)
-            appWidgetManager.updateAppWidget(widgetId, views)
-
-            // Ensure PriceService is running for live 1-second tick updates
-            // Wrapped in try/catch: startForegroundService can throw IllegalStateException
-            // on Android 12+ when the app is considered to be in the background
-            // (which is common when called from a BroadcastReceiver / onUpdate).
-            // Without this guard the entire onUpdate crashes → "Can't load widget".
-            try {
-                val serviceIntent = Intent(context, PriceService::class.java)
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
-                    context.startForegroundService(serviceIntent)
-                else
-                    context.startService(serviceIntent)
-            } catch (_: Exception) { }
+            WidgetUpdater.applyLoadingState(context, appWidgetManager, widgetId)
         }
+
+        // Ensure PriceService is running for live tick updates
+        try {
+            val serviceIntent = Intent(context, PriceService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                context.startForegroundService(serviceIntent)
+            else
+                context.startService(serviceIntent)
+        } catch (_: Exception) { }
     }
 
     // ── onAppWidgetOptionsChanged ────────────────────────────────────────────
@@ -109,30 +82,8 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle
     ) {
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val symbol = prefs.getString("widget_${appWidgetId}_symbol", "BTCUSDT") ?: "BTCUSDT"
-        val baseAsset = when {
-            symbol.endsWith("USDT") -> symbol.removeSuffix("USDT")
-            symbol.endsWith("BUSD") -> symbol.removeSuffix("BUSD")
-            symbol.endsWith("BTC")  -> symbol.removeSuffix("BTC")
-            else -> symbol
-        }
-
-        val layoutId = layoutForSize(newOptions)
-        val views = RemoteViews(context.packageName, layoutId)
-        views.setTextViewText(R.id.tvSymbol, baseAsset)
-        views.setTextViewText(R.id.tvPrice, "…")
-
-        val refreshIntent = Intent(context, this::class.java).apply {
-            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
-        }
-        val pi = PendingIntent.getBroadcast(
-            context, appWidgetId, refreshIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        views.setOnClickPendingIntent(R.id.rootLayout, pi)
-        appWidgetManager.updateAppWidget(appWidgetId, views)
+        // Reapply loading state with new layout for resized widget
+        WidgetUpdater.applyLoadingState(context, appWidgetManager, appWidgetId)
 
         // Kick PriceService to push a fresh update for this widget
         try {
