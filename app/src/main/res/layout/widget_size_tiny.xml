@@ -18,6 +18,21 @@
     <ImageView android:id="@+id/imgLogo"   android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvName"    android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <ImageView android:id="@+id/imgGraph"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView android:id="@+id/tvSubtitle" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvSymbol2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvPrice2"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvChange2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/imgGraph2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvSymbol3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvPrice3"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvChange3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/imgGraph3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvSymbol4" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvPrice4"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvChange4" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/imgGraph4" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <TextView  android:id="@+id/tvTime"    android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <ImageView android:id="@+id/btnStars"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <ImageView android:id="@+id/btnStars"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvQuote"   android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
     <TextView  android:id="@+id/tvTime"    android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
